@@ -5,19 +5,30 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
   TextInput
 } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Swiper from "react-native-swiper";
+import axios from 'axios'
 import { getOrientationAsync } from "expo/build/ScreenOrientation/ScreenOrientation";
+import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome, Feather, Octicons, Entypo, SimpleLineIcons, AntDesign, EvilIcons } from '@expo/vector-icons';
+import MovieCard from '../components/MovieCard'
+
+
 
 const { width, height } = Dimensions.get("window");
+const SEARCH = (<Ionicons name="md-search" size={height / 25} color={'#9DAAC7'} />);
+
 export class MainScreen extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      searchValue: '',
+      movies: []
+    };
   }
   render() {
     const renderHeader = () => {
@@ -34,6 +45,31 @@ export class MainScreen extends Component {
     };
     const renderBody = () => {
       const renderSwiper = () => {
+
+        const axiosCall = (text) => {
+          console.log('axioscall');
+          axios({
+            "method": "GET",
+            "url": "https://movie-database-imdb-alternative.p.rapidapi.com/",
+            "headers": {
+              "content-type": "application/octet-stream",
+              "x-rapidapi-host": "movie-database-imdb-alternative.p.rapidapi.com",
+              "x-rapidapi-key": "0916a7a044msh08cdca734606168p1a7422jsna4a679792623"
+            }, "params": {
+              "page": "1",
+              "r": "json",
+              "s": text
+            }
+          })
+            .then((response) => {
+              console.log(response.data)
+              if ('Search' in response.data) this.setState({ movies: response.data.Search })
+            })
+            .catch((error) => {
+              console.log('errror ', error)
+            })
+        }
+
         const renderPagination = (index, total, context) => {
           const title = ["Movies", "Games"];
           const renderButton = (value, myIndex) => {
@@ -63,6 +99,16 @@ export class MainScreen extends Component {
             </View>
           );
         };
+        const renderTab1 = () => {
+          return (
+            <ScrollView contentContainerStyle={{ alignItems: 'center', justifyContent: 'space-evenly' }}>
+
+              <TouchableOpacity onPress={() => axiosCall(this.state.searchValue)}><Text>{SEARCH}</Text></TouchableOpacity>
+              {this.state.movies.map(({ Poster, Title, Year }) => <MovieCard poster={Poster} title={Title} />)}
+            </ScrollView>
+          )
+
+        }
         return (
           <Swiper
             style={{}}
@@ -70,7 +116,8 @@ export class MainScreen extends Component {
             ref={swiperRef => (this.swiper = swiperRef)}
             loop={false}
           >
-            <Text>a</Text>
+
+            {renderTab1()}
             <Text>basdasdasd</Text>
           </Swiper>
         );
@@ -85,6 +132,8 @@ export class MainScreen extends Component {
                 fontSize: styles.$remValue
               }}
               placeholder={"Search"}
+              value={this.state.searchValue}
+              onChangeText={text => this.setState({ searchValue: text })}
             ></TextInput>
           </View>
         );
@@ -124,7 +173,7 @@ const styles = EStyleSheet.create({
     justifyContent: "space-evenly",
     flexDirection: "row",
     paddingTop: "10%",
-    backgroundColor: "green"
+    // backgroundColor: "green"
   },
   paginationStyle: {
     flexDirection: "row",
