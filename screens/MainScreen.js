@@ -1,23 +1,11 @@
-import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import EStyleSheet from 'react-native-extended-stylesheet';
-import { Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Swiper from 'react-native-swiper';
+import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import { getOrientationAsync } from 'expo/build/ScreenOrientation/ScreenOrientation';
-import {
-	Ionicons,
-	MaterialIcons,
-	MaterialCommunityIcons,
-	FontAwesome,
-	Feather,
-	Octicons,
-	Entypo,
-	SimpleLineIcons,
-	AntDesign,
-	EvilIcons
-} from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { Component } from 'react';
+import { Dimensions, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import EStyleSheet from 'react-native-extended-stylesheet';
+import Swiper from 'react-native-swiper';
+import { axiosGetNowPlaying, axiosGetMoviesByTitle } from '../API/axiosMovies';
 import MovieCard from '../components/MovieCard';
 
 const { width, height } = Dimensions.get('window');
@@ -31,6 +19,15 @@ export class MainScreen extends Component {
 			movies: []
 		};
 	}
+
+	getNowPlaying = async () => {
+		let movies = await axiosGetNowPlaying();
+		this.setState({ movies });
+	};
+
+	componentDidMount = async () => {
+		this.getNowPlaying();
+	};
 	render() {
 		const renderHeader = () => {
 			return (
@@ -42,30 +39,11 @@ export class MainScreen extends Component {
 			);
 		};
 		const renderBody = () => {
-			const axiosCall = (text) => {
-				console.log('axioscall');
-				axios({
-					method: 'GET',
-					url: 'https://movie-database-imdb-alternative.p.rapidapi.com/',
-					headers: {
-						'content-type': 'application/octet-stream',
-						'x-rapidapi-host': 'movie-database-imdb-alternative.p.rapidapi.com',
-						'x-rapidapi-key': '0916a7a044msh08cdca734606168p1a7422jsna4a679792623'
-					},
-					params: {
-						page: '1',
-						r: 'json',
-						s: text
-					}
-				})
-					.then((response) => {
-						console.log(response.data);
-						if ('Search' in response.data) this.setState({ movies: response.data.Search });
-					})
-					.catch((error) => {
-						console.log('errror ', error);
-					});
+			const axiosCall = async (text) => {
+				let res = await axiosGetMoviesByTitle(text);
+				if (res) this.setState({ movies: res });
 			};
+
 			const renderSwiper = () => {
 				const renderPagination = (index, total, context) => {
 					const title = [ 'Movies', 'Games' ];
@@ -92,12 +70,22 @@ export class MainScreen extends Component {
 				};
 				const renderTab1 = () => {
 					return (
-						<ScrollView contentContainerStyle={{ alignItems: 'center', justifyContent: 'space-evenly' }}>
-							<TouchableOpacity onPress={() => axiosCall(this.state.query)}>
-								<Text>{SEARCH}</Text>
-							</TouchableOpacity>
-							{this.state.movies.map(({ Poster, Title, Year }) => (
-								<MovieCard poster={Poster} title={Title} />
+						<ScrollView
+							contentContainerStyle={{
+								alignItems: 'center',
+								justifyContent: 'space-evenly',
+								flexWrap: 'wrap',
+								flexDirection: 'row'
+							}}
+						>
+							{this.state.movies.map(({ poster_path, title, release_date, id }) => (
+								<MovieCard
+									poster_path={poster_path}
+									title={title}
+									release_date={release_date}
+									key={id}
+									id={id}
+								/>
 							))}
 						</ScrollView>
 					);
@@ -116,6 +104,7 @@ export class MainScreen extends Component {
 			};
 			const renderTextInput = (text) => {
 				const handleInput = async (text) => {
+					if (!text) this.getNowPlaying();
 					this.setState(
 						{ query: text },
 						() => this.state.query && this.state.query.length > 1 && axiosCall(this.state.query)
@@ -131,7 +120,6 @@ export class MainScreen extends Component {
 							}}
 							placeholder={'Search'}
 							value={this.state.query}
-							// onChangeText={(text) => this.setState({ query: text })}
 							onChangeText={(text) => handleInput(text)}
 						/>
 					</View>
@@ -172,7 +160,6 @@ const styles = EStyleSheet.create({
 		justifyContent: 'space-evenly',
 		flexDirection: 'row',
 		paddingTop: '10%'
-		// backgroundColor: "green"
 	},
 	paginationStyle: {
 		flexDirection: 'row',
