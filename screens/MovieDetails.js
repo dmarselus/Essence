@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { Dimensions, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Carousel from 'react-native-snap-carousel';
+import PersonCard from '../components/PersonCard';
 import {
 	axiosGetNowPlaying,
 	axiosGetMoviesByTitle,
@@ -34,6 +35,8 @@ export class MovieDetails extends Component {
 
 	componentDidMount = async () => {
 		let id = this.props.navigation.getParam('paramOne');
+		console.log(id);
+
 		let movie = await axiosGetMovieDetailsById(id);
 		let casts = await axiosGetMovieCastsById(id);
 		console.log(casts.length);
@@ -57,31 +60,54 @@ export class MovieDetails extends Component {
 			};
 			const renderTop = () => {
 				return (
-					<View style={{ justifyContent: 'space-evenly', backgroundColor: 'orange' }}>
-						<View style={{ alignItems: 'center' }}>
+					<View style={{ justifyContent: 'space-around', height: '60%' }}>
+						<View style={{ flexDirection: 'row', width: width, justifyContent: 'space-around' }}>
 							<Image
 								style={{ width: width / 2.25, height: width / 2.25 * 1.5 }}
 								source={{ uri: `${imgHeader}${this.state.movie && this.state.movie.poster_path}` }}
 								resizeMethod={'resize'}
 							/>
+							<Text style={{ fontSize: styles.$remValue, color: 'white' }}>some Desciption</Text>
 						</View>
-						<View style={{}}>
-							<Text style={{ fontSize: styles.$remValue * 1.1, color: 'white' }}>
-								{this.state.movie && this.state.movie.overview}
-							</Text>
-						</View>
+
+						<Text style={{ fontSize: styles.$remValue, color: 'white' }}>
+							{this.state.movie && this.state.movie.overview}
+						</Text>
 					</View>
 				);
 			};
 			const renderCarousel = (array) => {
+				const handlePress = (clickedIndex, currentIndex) => {
+					if (clickedIndex === currentIndex) console.log('next page');
+					else this.refs.carousel.snapToItem(clickedIndex, true);
+				};
 				return (
 					<Carousel
-						// ref={(c) => { this._carousel = c; }}
-						// containerCustomStyle={{ backgroundColor: 'red', height: height / 2, width: width }}
+						ref={'carousel'}
+						// contentContainerCustomStyle={{}}
+						// layout={'tinder'}
+						// layoutCardOffset={`1`}
+						// hasParallaxImages
+						// layoutCardOffset={19}
+						style={{ height: '30%', backgroundColor: 'yellow' }}
+						inactiveSlideOpacity={0.5}
+						lockScrollWhileSnapping={true}
+						enableMomentum
 						data={array}
-						renderItem={({ item, index }) => <Text>{item.name}</Text>}
+						renderItem={({ item, index }) => {
+							return (
+								<PersonCard
+									profile_path={item.profile_path}
+									characterName={item.character}
+									realName={item.name}
+									personId={item.credit_id}
+									onPress={() => handlePress(index, this.refs.carousel.currentIndex)}
+								/>
+							);
+						}}
 						sliderWidth={width}
-						itemWidth={width / 5}
+						itemWidth={width / 2.5}
+						// itemHeight={height / 4}
 					/>
 				);
 			};
@@ -90,7 +116,8 @@ export class MovieDetails extends Component {
 					style={{
 						alignItems: 'flex-start',
 						justifyContent: 'space-around',
-						width: width
+						width: width,
+						height: height
 					}}
 				>
 					{renderTop()}
