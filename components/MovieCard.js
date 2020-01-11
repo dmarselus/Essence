@@ -22,7 +22,7 @@ export default class MovieCard extends Component {
 		};
 
 		return (
-			<TouchableOpacity onPress={() => console.log(this.props.id)} style={{ marginVertical: '5%' }}>
+			<TouchableOpacity onPress={this.props.onPress} style={{ marginVertical: '5%' }}>
 				<View style={styles.cardContainer}>
 					<View style={{ height: '20%', justifyContent: 'center' }}>
 						<Text style={{ fontSize: styles.$remValue * 1, textAlign: 'center', color: 'white' }}>

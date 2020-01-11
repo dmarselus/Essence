@@ -1,5 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { Component } from 'react';
 import { Dimensions, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -9,7 +7,6 @@ import { axiosGetNowPlaying, axiosGetMoviesByTitle } from '../API/axiosMovies';
 import MovieCard from '../components/MovieCard';
 
 const { width, height } = Dimensions.get('window');
-const SEARCH = <Ionicons name="md-search" size={height / 25} color={'#9DAAC7'} />;
 
 export class MainScreen extends Component {
 	constructor(props) {
@@ -84,7 +81,8 @@ export class MainScreen extends Component {
 									title={title}
 									release_date={release_date}
 									key={id}
-									id={id}
+									onPress={() =>
+										this.props.navigation.navigate('MovieDetails', { paramOne: id.toString() })}
 								/>
 							))}
 						</ScrollView>
