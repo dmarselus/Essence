@@ -1,18 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { Component } from 'react';
-import { Dimensions, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Text, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Carousel from 'react-native-snap-carousel';
+import { axiosGetMovieCastsById, axiosGetMovieDetailsById, axiosGetNowPlaying } from '../API/axiosMovies';
 import PersonCard from '../components/PersonCard';
-import {
-	axiosGetNowPlaying,
-	axiosGetMoviesByTitle,
-	axiosGetMovieDetailsById,
-	axiosGetMovieCastsById
-} from '../API/axiosMovies';
-import MovieCard from '../components/MovieCard';
 
 const { width, height } = Dimensions.get('window');
 const SEARCH = <Ionicons name="md-search" size={height / 25} color={'#9DAAC7'} />;
@@ -39,9 +32,11 @@ export class MovieDetails extends Component {
 
 		let movie = await axiosGetMovieDetailsById(id);
 		let casts = await axiosGetMovieCastsById(id);
+		casts = casts.map((item) => ({ ...item, active: false }))
 		console.log(casts.length);
 
-		this.setState({ movie, casts }, () => console.log(this.state.casts.length));
+
+		this.setState({ movie, casts });
 	};
 	render() {
 		const renderHeader = () => {
@@ -54,10 +49,7 @@ export class MovieDetails extends Component {
 			);
 		};
 		const renderBody = () => {
-			const axiosCall = async (text) => {
-				let res = await axiosGetMoviesByTitle(text);
-				if (res) this.setState({ movies: res });
-			};
+
 			const renderTop = () => {
 				return (
 					<View style={{ justifyContent: 'space-around', height: '60%' }}>
@@ -84,11 +76,6 @@ export class MovieDetails extends Component {
 				return (
 					<Carousel
 						ref={'carousel'}
-						// contentContainerCustomStyle={{}}
-						// layout={'tinder'}
-						// layoutCardOffset={`1`}
-						// hasParallaxImages
-						// layoutCardOffset={19}
 						style={{ height: '30%', backgroundColor: 'yellow' }}
 						inactiveSlideOpacity={0.5}
 						lockScrollWhileSnapping={true}
@@ -101,13 +88,13 @@ export class MovieDetails extends Component {
 									characterName={item.character}
 									realName={item.name}
 									personId={item.credit_id}
-									onPress={() => handlePress(index, this.refs.carousel.currentIndex)}
+									onPress={() => handlePress(index, this.refs.carousel.currentIndex, item)}
 								/>
 							);
 						}}
 						sliderWidth={width}
 						itemWidth={width / 2.5}
-						// itemHeight={height / 4}
+					// itemHeight={height / 4}
 					/>
 				);
 			};
@@ -129,7 +116,7 @@ export class MovieDetails extends Component {
 			<LinearGradient
 				start={{ x: 1, y: 0 }}
 				end={{ x: 1, y: 1 }}
-				colors={[ '#353b4d', '#212530' ]}
+				colors={['#353b4d', '#212530']}
 				style={{ flex: 1 }}
 			>
 				{renderHeader()}

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Dimensions, View, Text, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
 	Ionicons,
 	MaterialIcons,
@@ -14,12 +15,12 @@ import {
 	AntDesign,
 	EvilIcons
 } from '@expo/vector-icons';
-// import { mdiEmoticonDead } from '@mdi/js';
-// import Theme from 'react-native-theming';
+
 
 const { width, height } = Dimensions.get('window');
 const imgHeader = 'https://image.tmdb.org/t/p/w500';
 
+// /arrow-right-bold-circle
 export default class PersonCard extends Component {
 	// * * * * * * * * * * *
 	// * Props
@@ -37,35 +38,27 @@ export default class PersonCard extends Component {
 
 		return (
 			<TouchableOpacity onPress={this.props.onPress} style={styles.card}>
-				{/* <LinearGradient
-					start={{ x: 1, y: 0 }}
-					end={{ x: 1, y: 1 }}
-					colors={[ 'transparent', 'black' ]}
-					// style={{ borderRadius:height/2}}
-				> */}
-				<Image
-					style={[
-						{
-							// alignItems: 'center',
-							// justifyContent: 'flex-end'
-							// height: '60%'
-							// opacity: 0.75,
-							//
-							resizeMode: 'stretch'
-							// resizeMethod: 'resize'
-						}
-					]}
-					source={{
-						uri: `${imgHeader}${this.props.profile_path}`,
-						width: width / 3,
+
+				{this.props.profile_path ?
+					<Image
+						source={{
+							uri: `${imgHeader}${this.props.profile_path}`,
+							width: width / 3,
+							height: width / 2.5,
+							scale: 2
+						}}
+						resizeMode={'cover'} /> :
+					<View style={{
+						justifyContent: 'center',
 						height: width / 2.5,
-						scale: 2
-					}}
-					// imageStyle={{ resizeMode: 'cover' }}
-				/>
+					}}>
+						<MaterialCommunityIcons name="emoticon-dead-outline" size={width / 3} color={'#9DAAC7'} />
+					</View>
+
+				}
 				<View style={{ justifyContent: 'space-around', height: '25%', backgroundColor: 'blue' }}>
-					<Text style={{ fontSize: styles.$remValue, color: 'white' }}>some Desciption</Text>
-					<Text style={{ fontSize: styles.$remValue, color: 'white' }}>some Desciption</Text>
+					<Text style={{ fontSize: styles.$remValue, color: 'white' }}>{this.props.realName}</Text>
+					<Text style={{ fontSize: styles.$remValue, color: 'white' }}>{this.props.characterName}</Text>
 				</View>
 				{/* </LinearGradient> */}
 			</TouchableOpacity>
@@ -78,7 +71,7 @@ const styles = EStyleSheet.create({
 	card: {
 		marginHorizontal: '1rem',
 		width: width / 3,
-		height: width / 1.75,
-		backgroundColor: 'red'
+
+
 	}
 });
